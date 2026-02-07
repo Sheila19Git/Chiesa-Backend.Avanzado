@@ -1,0 +1,26 @@
+[
+  {
+    "id": 2,
+    "status": true,
+    "title": "Camiseta minimalista",
+    "description": "Camiseta de algodón",
+    "code": "CM001",
+    "price": 1200,
+    "stock": 10,
+    "category": "ropa",
+    "thumbnails": [
+      "img/camiseta1.jpg"
+    ]
+  },
+  {
+    "id": 3,
+    "status": true,
+    "title": "Producto prueba",
+    "description": "Descripción",
+    "code": "P001",
+    "price": 1000,
+    "stock": 5,
+    "category": "test",
+    "thumbnails": []
+  }
+]
