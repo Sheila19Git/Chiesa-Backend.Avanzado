@@ -10,39 +10,21 @@ router.get('/', async (req, res) => {
   res.json(products);
 });
 
-// GET 
+// GET
 router.get('/:pid', async (req, res) => {
   const { pid } = req.params;
   const product = await productManager.getProductById(pid);
 
-  if (!product) {
-    return res.status(404).json({ error: 'Producto no encontrado' });
-  }
+  if (!product) return res.status(404).json({ error: 'Producto no encontrado' });
 
   res.json(product);
 });
 
 // POST 
 router.post('/', async (req, res) => {
-  const {
-    title,
-    description,
-    code,
-    price,
-    status,
-    stock,
-    category,
-    thumbnails
-  } = req.body;
+  const { title, description, code, price, status, stock, category, thumbnails } = req.body;
 
-  if (
-    !title ||
-    !description ||
-    !code ||
-    price === undefined ||
-    stock === undefined ||
-    !category
-  ) {
+  if (!title || !description || !code || price === undefined || stock === undefined || !category) {
     return res.status(400).json({ error: 'Faltan campos obligatorios' });
   }
 
@@ -57,32 +39,31 @@ router.post('/', async (req, res) => {
     thumbnails: thumbnails || []
   });
 
+  const io = req.app.get('io');
+  io.emit('actualizarProductos', newProduct);
+
   res.status(201).json(newProduct);
 });
 
-// PUT 
 router.put('/:pid', async (req, res) => {
   const { pid } = req.params;
   const updatedProduct = await productManager.updateProduct(pid, req.body);
 
-  if (!updatedProduct) {
-    return res.status(404).json({ error: 'Producto no encontrado' });
-  }
+  if (!updatedProduct) return res.status(404).json({ error: 'Producto no encontrado' });
 
   res.json(updatedProduct);
 });
 
-// DELETE 
 router.delete('/:pid', async (req, res) => {
   const { pid } = req.params;
   const deleted = await productManager.deleteProduct(pid);
 
-  if (!deleted) {
-    return res.status(404).json({ error: 'Producto no encontrado' });
-  }
+  if (!deleted) return res.status(404).json({ error: 'Producto no encontrado' });
+
+  const io = req.app.get('io');
+  io.emit('actualizarEliminacion', parseInt(pid));
 
   res.json({ message: 'Producto eliminado correctamente' });
 });
 
 export default router;
-

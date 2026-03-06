@@ -56,7 +56,7 @@ export default class ProductManager {
     products[index] = {
       ...products[index],
       ...updatedFields,
-      id: products[index].id // el id NO se toca
+      id: products[index].id 
     };
 
     await fs.promises.writeFile(
