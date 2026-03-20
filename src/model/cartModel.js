@@ -6,7 +6,7 @@ const cartSchema = new Schema({
       {
         product: {
           type: Schema.Types.ObjectId,
-          ref: 'Product',
+          ref: 'products', 
           required: true
         },
         quantity: {

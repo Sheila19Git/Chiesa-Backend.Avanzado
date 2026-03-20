@@ -1,20 +1,17 @@
 <h1>Carrito</h1>
 
-{{#each cart.products}}
-  <div>
-    <h3>{{this.product.title}}</h3>
-    <p>Precio: ${{this.product.price}}</p>
-    <p>Cantidad: {{this.quantity}}</p>
-  </div>
-  <hr>
-{{/each}}
-<h1>Carrito</h1>
+{{#if cart.products.length}}
+  {{#each cart.products}}
+    <div>
+      <h3>{{this.product.title}}</h3>
+      <p>Precio: ${{this.product.price}}</p>
+      <p>Cantidad: {{this.quantity}}</p>
+    </div>
+    <hr>
+  {{/each}}
 
-{{#each cart.products}}
-  <div>
-    <h3>{{this.product.title}}</h3>
-    <p>Precio: ${{this.product.price}}</p>
-    <p>Cantidad: {{this.quantity}}</p>
-  </div>
-  <hr>
-{{/each}}
+  <p>Total de productos: {{cart.products.length}}</p>
+
+{{else}}
+  <p>El carrito está vacío</p>
+{{/if}}
