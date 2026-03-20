@@ -1,7 +1,10 @@
- {
+{
+  "name": "ecommerce-backend",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx kill-port 8080 && nodemon src/app.js"
+    "dev": "npx kill-port 8080 && nodemon src/app.js",
+    "start": "node src/app.js"
   },
   "dependencies": {
     "express": "^4.18.2",
