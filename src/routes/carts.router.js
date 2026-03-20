@@ -1,44 +1,91 @@
  import { Router } from 'express';
-import CartManager from '../managers/CartManager.js';
-
-console.log('🔥 carts.router.js cargado');
+import { CartModel } from '../model/cartModel.js'; // tu modelo de Cart en MongoDB
 
 const router = Router();
-const cartManager = new CartManager('./src/data/carts.json');
 
-// GET /api/carts
+// GET-todos los carritos
 router.get('/', async (req, res) => {
-  const carts = await cartManager.getCarts();
+  const carts = await CartModel.find().lean();
   res.json(carts);
 });
 
-// POST /api/carts
+// POST-crear carrito vacío
 router.post('/', async (req, res) => {
-  const newCart = await cartManager.createCart();
+  const newCart = await CartModel.create({ products: [] });
   res.status(201).json(newCart);
 });
 
-// GET /api/carts/:cid
+// GET-carrito por ID con productos completos
 router.get('/:cid', async (req, res) => {
-  const cart = await cartManager.getCartById(Number(req.params.cid));
-  if (!cart) {
-    return res.status(404).json({ error: 'Carrito no encontrado' });
-  }
-  res.json(cart.products);
+  const { cid } = req.params;
+  const cart = await CartModel.findById(cid).populate('products.product').lean();
+  if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
+  res.json(cart);
 });
 
-// POST /api/carts/:cid/product/:pid
-router.post('/:cid/product/:pid', async (req, res) => {
-  const cart = await cartManager.addProductToCart(
-    Number(req.params.cid),
-    Number(req.params.pid)
-  );
+// POST-agregar producto al carrito
+router.post('/:cid/products/:pid', async (req, res) => {
+  const { cid, pid } = req.params;
+  const cart = await CartModel.findById(cid);
+  if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
 
-  if (!cart) {
-    return res.status(404).json({ error: 'Carrito no encontrado' });
-  }
+  const existingProduct = cart.products.find(p => p.product.toString() === pid);
+  if (existingProduct) existingProduct.quantity += 1;
+  else cart.products.push({ product: pid, quantity: 1 });
 
+  await cart.save();
   res.json(cart);
+});
+
+// PUT-actualizar todos los productos del carrito
+router.put('/:cid', async (req, res) => {
+  const { cid } = req.params;
+  const { products } = req.body;
+
+  const cart = await CartModel.findById(cid);
+  if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
+
+  cart.products = products;
+  await cart.save();
+  res.json(cart);
+});
+
+// PUT-actualizar solo cantidad de un producto
+router.put('/:cid/products/:pid', async (req, res) => {
+  const { cid, pid } = req.params;
+  const { quantity } = req.body;
+
+  const cart = await CartModel.findById(cid);
+  if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
+
+  const productInCart = cart.products.find(p => p.product.toString() === pid);
+  if (!productInCart) return res.status(404).json({ error: 'Producto no encontrado en el carrito' });
+
+  productInCart.quantity = quantity;
+  await cart.save();
+  res.json(cart);
+});
+
+// DELETE-producto especifico
+router.delete('/:cid/products/:pid', async (req, res) => {
+  const { cid, pid } = req.params;
+  const cart = await CartModel.findById(cid);
+  if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
+
+  cart.products = cart.products.filter(p => p.product.toString() !== pid);
+  await cart.save();
+  res.json(cart);
+});
+
+// DELETE
+router.delete('/:cid', async (req, res) => {
+  const { cid } = req.params;
+  const cart = await CartModel.findById(cid);
+  if (!cart) return res.status(404).json({ error: 'Carrito no encontrado' });
+
+  cart.products = [];
+  await cart.save();
+  res.json({ message: 'Carrito vaciado correctamente' });
 });
 
 export default router;
